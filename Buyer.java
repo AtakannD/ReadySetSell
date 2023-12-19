@@ -1,2 +1,3 @@
-public class Buyer {
+public class Buyer extends User{
+	
 }
