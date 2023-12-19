@@ -1,2 +1,3 @@
-public class Seller {
+public class Seller extends User{
+	
 }
