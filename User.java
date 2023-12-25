@@ -2,6 +2,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class User {
 	String url = "jdbc:mysql://localhost:3306/auction_system";
@@ -17,9 +18,12 @@ public class User {
 	private Buyer buyer;
 	private Admin admin;
 
+	private Scanner scanner;
+
 	public User(String userEmail, String userPassword) {
 		this.userEmail = userEmail;
 		this.userPassword = userPassword;
+		scanner = new Scanner(System.in);
 	}
 
 
@@ -99,7 +103,7 @@ public class User {
 					seller.displaySellerMenu();
 				} else if ("B".equalsIgnoreCase(currentUserType)) {
 					buyer = new Buyer(userEmail, userPassword);
-					buyer.displayBuyerMenu();
+					buyer.getActionsByUser();
 				} else {
 					admin = new Admin(userEmail, userPassword);
 					admin.displayAdminMenu();
@@ -110,6 +114,26 @@ public class User {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+	}
+
+	public int getValidOption() {
+		int option;
+		while (true) {
+			try {
+				System.out.print("Enter option number: ");
+				option = scanner.nextInt();
+				scanner.nextLine();
+				if (option >= 0 && option <= 9) {
+					break;
+				} else {
+					System.out.println("Invalid option. Please enter a number between 1 and 8.");
+				}
+			} catch (Exception e) {
+				System.out.println("Invalid input. Please enter a number.");
+				scanner.nextLine();
+			}
+		}
+		return option;
 	}
 
 
