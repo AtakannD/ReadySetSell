@@ -57,31 +57,6 @@ public class AuctionSystem {
         System.out.println("0. Quit");
     }
 
-    private void displayBuyerMenu() {
-        System.out.println("\nWelcome Buyer! Choose an option:");
-        System.out.println("1. Search Item");
-        System.out.println("2. Join Auction");
-        System.out.println("3. Watch Auction");
-        System.out.println("0. Quit");
-    }
-
-    private void displaySellerMenu() {
-        System.out.println("\nWelcome Seller! Choose an option:");
-        System.out.println("1. Add Item");
-        System.out.println("2. Remove Item");
-        System.out.println("3. Watch Auction");
-        System.out.println("0. Quit");
-    }
-    private void displayAdminMenu() {
-        System.out.println("\nWelcome Admin! Choose an option:");
-        System.out.println("1. Create Auction");
-        System.out.println("2. Watch Auction");
-        System.out.println("3. End Auction");
-        System.out.println("4. Remove Items From Auction");
-        System.out.println("5. Show Auction History");
-        System.out.println("0. Quit");
-    }
-
     private int getValidOption() {
         int option;
         while (true) {
@@ -111,6 +86,7 @@ public class AuctionSystem {
         User user = new User(emailAddress,userPassword);
         user.login();
         loginStatus = true;
+        user.displayMenusForDifferentUserTypes();
     }
 
     private void register() { //bunu int döndür. Local kaydetsin. Ona göre menü gözüksün.
