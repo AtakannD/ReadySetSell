@@ -77,7 +77,7 @@ public class AuctionSystem {
         return option;
     }
 
-    private void login() { //bunu int döndür. Local kaydetsin. Ona göre menü gözüksün.
+    private void login() {
         System.out.println("Enter e-mail address: ");
         String emailAddress = scanner.nextLine();
         System.out.println("Enter your password: ");
@@ -89,7 +89,7 @@ public class AuctionSystem {
         user.displayMenusForDifferentUserTypes();
     }
 
-    private void register() { //bunu int döndür. Local kaydetsin. Ona göre menü gözüksün.
+    private void register() {
         System.out.println("Enter your first name: ");
         String firstName = scanner.nextLine();
 
@@ -108,10 +108,6 @@ public class AuctionSystem {
         User user = new User(emailAddress,userPassword);
         user.register(firstName,lastName,userType);
         loginStatus = true;
-    }
-
-    private void searchItem(){ //BUYER
-
     }
 
     private void addItem(){ //SELLER

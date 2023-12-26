@@ -11,6 +11,9 @@ public class Buyer extends User{
     String username = "root";
     String password = "";
     List<String> searchList;
+    List<String> auctionList;
+
+    // Auction currentAuction;
 
     public Buyer(String userEmail, String userPassword) {
         super(userEmail, userPassword);
@@ -73,6 +76,16 @@ public class Buyer extends User{
                     System.out.println("No items found matching the search keyword.");
                 }
             }
+            System.out.println("\nDo you want to return to the menu? (yes/no)");
+            String returnOption = scanner.nextLine().toLowerCase();
+
+            if ("yes".equals(returnOption)) {
+                getActionsByUser();
+            } else {
+                System.out.println("Exiting the Auction System. Goodbye!");
+                scanner.close();
+                System.exit(0);
+            }
             connection.close();
         } catch (Exception e) {
             System.out.println(e);
@@ -80,7 +93,53 @@ public class Buyer extends User{
     }
 
     private void joinAuction() {
+        /*
+        System.out.println("Please enter Auction Id: ");
+		int auctionId = scanner.nextInt();
 
+        boolean found = false;
+        for (Auction auction : auctions) {
+            if (auction.getAuctionId() == auctionId) {
+            	currentAuction = auctions;
+            	System.out.println("Watching " + auctionId +" Auction from streaming service!");
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("\nNo auction found.");
+        }
+         */
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(url, username, password);
+            Statement statement = connection.createStatement();
+
+            String searchQueryForItems = "SELECT *  FROM items";
+            ResultSet auctionListResult = statement.executeQuery(searchQueryForItems);
+
+            auctionList = new ArrayList<>();
+            while (auctionListResult.next()) {
+                String itemName = auctionListResult.getString("item_name");
+                int itemQuantity = auctionListResult.getInt("item_quantity");
+                int itemPrice = auctionListResult.getInt("base_price");
+                int itemId = auctionListResult.getInt("item_id");
+                String resultString = itemId + ". " + itemQuantity + "x " + itemName + " " + itemPrice + "TL";
+                auctionList.add(resultString);
+            }
+
+            if (!auctionList.isEmpty()) {
+                System.out.println("You can bid on: ");
+                for (String itemName : auctionList) {
+                    System.out.println(itemName);
+                }
+            } else {
+                System.out.println("No items found in auction right now.");
+            }
+            connection.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     private void watchAuction() {
