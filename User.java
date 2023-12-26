@@ -1,7 +1,6 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class User {
@@ -9,14 +8,15 @@ public class User {
 	String username = "root";
 	String password = "";
 
-	//userEmail, userpassword. constructor ile kurulacak.
-	private String userEmail;
-	private String userPassword;
+	String userEmail;
+	String userPassword;
 	private String currentUserType;
 
 	private Seller seller;
 	private Buyer buyer;
 	private Admin admin;
+	List<String> auctionList;
+
 
 	private Scanner scanner;
 
@@ -34,20 +34,16 @@ public class User {
 			Connection connection = DriverManager.getConnection(url, username, password);
 			Statement statement = connection.createStatement();
 
-			// Check if there is a user with the provided email and password
 			String query = "SELECT * FROM user WHERE user_email = '" + userEmail + "' AND user_password = '" + userPassword + "'";
 			ResultSet resultSet = statement.executeQuery(query);
 
 			if (resultSet.next()) {
-				// User is authenticated
 				System.out.println("Login successful!");
 
 			} else {
-				// Authentication failed
 				System.out.println("Invalid email or password. Please try again.");
 			}
 
-			// After successful login, retrieve user_type and store it
 			String userTypeQuery = "SELECT user_type FROM user WHERE user_email = '" + userEmail + "'";
 			ResultSet userTypeResult = statement.executeQuery(userTypeQuery);
 
@@ -136,8 +132,51 @@ public class User {
 		return option;
 	}
 
+	public void watchAuction() {
+		System.out.println("Please enter Auction Id: ");
+		int auctionId = scanner.nextInt();
 
-	public void watchAuction(){
-		System.out.println("Watching Mezat Stream!");
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			Connection connection = DriverManager.getConnection(url, username, password);
+			String searchQueryForItems = "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL";
+
+			try (PreparedStatement preparedStatementItems = connection.prepareStatement(searchQueryForItems)) {
+
+				preparedStatementItems.setInt(1, auctionId);
+				ResultSet resultSetForItems = preparedStatementItems.executeQuery();
+
+				auctionList = new ArrayList<>();
+
+				while (resultSetForItems.next()) {
+					String resultString;
+					String itemName = resultSetForItems.getString("item_name");
+					int itemQuantity = resultSetForItems.getInt("item_quantity");
+					int itemPrice = resultSetForItems.getInt("base_price");
+					int itemId = resultSetForItems.getInt("item_id");
+					int bids = resultSetForItems.getInt("bids");
+					int auctionTimer = resultSetForItems.getInt("timer");
+
+					if (bids > itemPrice) {
+						resultString = itemId + ". " + itemQuantity + "x " + itemName + " " + itemPrice + "TL but highest bid is " + bids + "TL and remaining time is: " + auctionTimer + " minutes.";
+					} else {
+						resultString = itemId + ". " + itemQuantity + "x " + itemName + " " + itemPrice + "TL and remaining time is: " + auctionTimer + " minutes.";
+					}
+					auctionList.add(resultString);
+				}
+
+				if (!auctionList.isEmpty()) {
+					System.out.println("These items are in the auction: ");
+					for (String itemName : auctionList) {
+						System.out.println(itemName);
+					}
+				} else {
+					System.out.println("No items found in the auction right now.");
+				}
+			}
+			connection.close();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 }

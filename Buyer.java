@@ -12,9 +12,6 @@ public class Buyer extends User{
     String password = "";
     List<String> searchList;
     List<String> auctionList;
-    Auction auctions;
-
-    // Auction currentAuction;
 
     public Buyer(String userEmail, String userPassword) {
         super(userEmail, userPassword);
@@ -35,7 +32,7 @@ public class Buyer extends User{
         switch (option) {
             case 1 -> searchItem();
             case 2 -> joinAuction();
-            case 3 -> watchAuction();
+            case 3 -> watchAuctionAsBuyer();
             case 0 -> {
                 System.out.println("Exiting the Auction System. Goodbye!");
                 scanner.close();
@@ -71,7 +68,7 @@ public class Buyer extends User{
                 }
 
                 if (!searchList.isEmpty()) {
-                    System.out.println("Search results:");
+                    System.out.println("PS: If items get bid, you can not see in this option. \nSearch results:");
                     for (String itemName : searchList) {
                         System.out.println(itemName);
                     }
@@ -79,16 +76,7 @@ public class Buyer extends User{
                     System.out.println("No items found matching the search keyword.");
                 }
             }
-            System.out.println("\nDo you want to return to the menu? (yes/no)");
-            String returnOption = scanner.nextLine().toLowerCase();
-
-            if ("yes".equals(returnOption)) {
-                getActionsByUser();
-            } else {
-                System.out.println("Exiting the Auction System. Goodbye!");
-                scanner.close();
-                System.exit(0);
-            }
+            returnBuyerMenu();
             connection.close();
         } catch (Exception e) {
             System.out.println(e);
@@ -96,29 +84,17 @@ public class Buyer extends User{
     }
 
     private void joinAuction() {
+
         System.out.println("Please enter Auction Id: ");
 		int auctionId = scanner.nextInt();
-        /*
-        boolean found = false;
-        for (Auction auction : auctions) {
-            if (auction.getAuctionId() == auctionId) {
-            	currentAuction = auctions;
-            	System.out.println("Watching " + auctionId +" Auction from streaming service!");
-                found = true;
-            }
-        }
-
-        if (!found) {
-            System.out.println("\nNo auction found.");
-        }
-         */
+        scanner.nextLine();
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
 
-            String searchQueryForItems = "SELECT *  FROM items WHERE auction_id = '" + auctionId + "'";
+            String searchQueryForItems = "SELECT *  FROM items WHERE auction_id = '" + auctionId + "' AND timer IS NOT NULL";
             ResultSet auctionListResult = statement.executeQuery(searchQueryForItems);
 
             auctionList = new ArrayList<>();
@@ -153,58 +129,106 @@ public class Buyer extends User{
     }
 
     private void bidOnItem() {
-        System.out.println("Please enter the name of the item you want to bid on:");
-        String itemName = scanner.nextLine();
+        System.out.println("\nDo you want to exit without bid? (yes/no)");
+        String returnOption = scanner.nextLine().toLowerCase();
 
-        // Validate that the item name is not empty
-        while (itemName.trim().isEmpty()) {
-            System.out.println("Item name cannot be empty. Please enter a valid item name:");
-            itemName = scanner.nextLine();
+        if ("yes".equals(returnOption)) {
+            returnBuyerMenu();
+        } else {
+            System.out.println("Please enter the name of the item you want to bid on:");
+            String itemName = scanner.nextLine();
+
+            while (itemName.trim().isEmpty()) {
+                System.out.println("Item name cannot be empty. Please enter a valid item name:");
+                itemName = scanner.nextLine();
+            }
+
+            System.out.println("Please enter your bid. Remember your bid needs to be higher than the base price or previous bids.");
+            int newBidOnItem = scanner.nextInt();
+            scanner.nextLine();
+
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection connection = DriverManager.getConnection(url, username, password);
+                Statement statement = connection.createStatement();
+
+                String currentBidQuery = "SELECT bids, base_price, auction_id FROM items WHERE item_name ='"+ itemName +"'";
+                ResultSet resultSet = statement.executeQuery(currentBidQuery);
+                if (resultSet.next()) {
+                    int currentBids = resultSet.getInt("bids");
+                    int currentBasePrice = resultSet.getInt("base_price");
+                    int auctionId = resultSet.getInt("auction_id");
+                    // Check if the new bid is higher
+                    if (newBidOnItem > currentBids && newBidOnItem > currentBasePrice) {
+                        updateBHTable(newBidOnItem, currentBids, auctionId, itemName);
+                        String bidQueryForItems = "UPDATE items SET bids = GREATEST(bids, ?) WHERE item_name = ?";
+                        try (PreparedStatement preparedStatement = connection.prepareStatement(bidQueryForItems)) {
+                            preparedStatement.setInt(1, newBidOnItem);
+                            preparedStatement.setString(2, itemName);
+
+                            int rowsAffectedItems = preparedStatement.executeUpdate();
+
+                            if (rowsAffectedItems > 0) {
+
+                                    System.out.println("Bidding is successful. You can follow the auction with the Watch Auction option.");
+                                    returnBuyerMenu();
+                                }
+                            }
+
+                    } else {
+                        System.out.println("Your bid must be higher than the current bids and base price.");
+                        bidOnItem();
+                    }
+                } else {
+                    returnBuyerMenu();
+                }
+                connection.close();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
 
-        System.out.println("Please enter your bid. Remember your bid needs to be higher than the base price or previous bids.");
-        int newBidOnItem = scanner.nextInt();
-        scanner.nextLine();  // Consume the newline character left by nextInt()
+    }
 
+    private void watchAuctionAsBuyer() {
+        watchAuction();
+        returnBuyerMenu();
+    }
+
+    private void updateBHTable(int newBidOnItem, int currentBids, int auctionId, String item_name) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
+            String userName;
+            String userSurname;
+            String getBuyerInfos = "SELECT user_name, user_surname FROM user WHERE user_email = '" + userEmail + "' AND user_password = '" + userPassword + "'";
+            ResultSet resultSetUserInfos = statement.executeQuery(getBuyerInfos);
 
-            String currentBidQuery = "SELECT bids, base_price FROM items WHERE item_name ='"+ itemName +"'";
-            ResultSet resultSet = statement.executeQuery(currentBidQuery);
-            if (resultSet.next()) {
-                int currentBids = resultSet.getInt("bids");
-                int currentBasePrice = resultSet.getInt("base_price");
-                // Check if the new bid is higher
-                if (newBidOnItem > currentBids && newBidOnItem > currentBasePrice) {
-                    String bidQueryForItems = "UPDATE items SET bids = GREATEST(bids, ?) WHERE item_name = ?";
-                    try (PreparedStatement preparedStatement = connection.prepareStatement(bidQueryForItems)) {
-                        preparedStatement.setInt(1, newBidOnItem);
-                        preparedStatement.setString(2, itemName);
+            if (resultSetUserInfos.next()) {
+                userName = resultSetUserInfos.getString("user_name");
+                userSurname = resultSetUserInfos.getString("user_surname");
+                String buyerName = userName + " " + userSurname;
 
-                        // Execute the update
-                        int rowsAffectedItems = preparedStatement.executeUpdate();
-
-                        if (rowsAffectedItems > 0) {
-                            System.out.println("Bidding is successful. You can follow the auction with the Watch Auction option.");
-                            getActionsByUser();
-                        } else {
-                            System.out.println("Bidding failed. Please try again.");
-                        }
-                    }
-                } else {
-                    System.out.println("Your bid must be higher than the current bids and base price.");
-                    bidOnItem();
-                }
-            } else {
-                System.out.println("Item not found. You are directing buyer menu.");
-                getActionsByUser();
+                String bhUpdateQuery = "UPDATE bid_history SET bidder_name = '" + buyerName + "', item_bids = " + newBidOnItem + ", item_previous_bid = " + currentBids +" WHERE  item_name = '" + item_name + "' AND auction_id = " + auctionId;
+                statement.executeUpdate(bhUpdateQuery);
             }
-
-            connection.close();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+
+    private void returnBuyerMenu() {
+        System.out.println("\nDo you want to return to the menu? (yes/no)");
+        String returnOption = scanner.nextLine().toLowerCase();
+
+        if ("yes".equals(returnOption)) {
+            getActionsByUser();
+        } else {
+            System.out.println("Exiting the Auction System. Goodbye!");
+            scanner.close();
+            System.exit(0);
         }
     }
 }
