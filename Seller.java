@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Scanner;
 
@@ -26,7 +27,12 @@ public class Seller extends User{
         switch (option) {
             case 1 -> addItem();
             case 2 -> removeItem();
-            case 3 -> watchAuction();
+            case 3 -> watchAuctionAsSeller();
+            case 0 -> {
+                System.out.println("Exiting the Auction System. Goodbye!");
+                scanner.close();
+                System.exit(0);
+            }
         }
     }
 
@@ -40,6 +46,7 @@ public class Seller extends User{
         System.out.println("Please enter your items' auction number which belongs to: ");
         Integer itemsAuctionNumber = scanner.nextInt();
         Integer lowerBid = itemsBasePrice;
+        scanner.nextLine();
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -49,14 +56,31 @@ public class Seller extends User{
             String itemAddingQuery = "INSERT INTO items (item_name, item_quantity, base_price, auction_id, bids)" +
                     "VALUES ('" + itemName + "', '" + itemsQuantity + "', '" + itemsBasePrice + "', '" + itemsAuctionNumber + "', '" + lowerBid + "')";
             int rowsAffertedItems = statement.executeUpdate(itemAddingQuery);
+            String userName;
+            String userSurname;
 
             if (rowsAffertedItems > 0) {
-                System.out.println("Item addition is succesfull!");
-                System.out.println("You are directing menu again.");
-                getActionsBySeller();
+
+                String getSellerInfos = "SELECT user_name, user_surname FROM user WHERE user_email = '" + userEmail + "' AND user_password = '" + userPassword + "'";
+                ResultSet resultSetUserInfos = statement.executeQuery(getSellerInfos);
+
+                if (resultSetUserInfos.next()) {
+                    userName = resultSetUserInfos.getString("user_name");
+                    userSurname = resultSetUserInfos.getString("user_surname");
+                    String sellerName = userName + " " + userSurname;
+
+                    String bhInsertQuery = "INSERT INTO bid_history (seller_name, item_name, item_quantity, base_price, auction_id)" +
+                            "VALUES ('" + sellerName + "','" + itemName + "', '" + itemsQuantity + "', '" + itemsBasePrice + "', '" + itemsAuctionNumber + "')";
+                    int rowsAffectedBidsHistory = statement.executeUpdate(bhInsertQuery);
+                    if (rowsAffectedBidsHistory > 0) {
+                        System.out.println("Item addition is succesfull!");
+                    }
+                }
             } else {
                 System.out.println("Items addition failed. Please try again.");
             }
+            returnSellersMenu();
+            connection.close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -75,13 +99,29 @@ public class Seller extends User{
 
             if (rowsAffectedItems > 0) {
                 System.out.println("Item removing is succesfull!");
-                System.out.println("You are directing menu again.");
-                getActionsBySeller();
+
             } else {
                 System.out.println("Items removing failed. Please try again.");
             }
+            returnSellersMenu();
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+    private void watchAuctionAsSeller() {
+        watchAuction();
+        returnSellersMenu();
+    }
+    private void returnSellersMenu() {
+        System.out.println("\nDo you want to return to the menu? (yes/no)");
+        String returnOption = scanner.nextLine().toLowerCase();
+
+        if ("yes".equals(returnOption)) {
+            getActionsBySeller();
+        } else {
+            System.out.println("Exiting the Auction System. Goodbye!");
+            scanner.close();
+            System.exit(0);
         }
     }
 }

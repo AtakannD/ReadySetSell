@@ -18,20 +18,19 @@ public class AuctionSystem {
     private AuctionSystem(){
         this.scanner = new Scanner(System.in);
         this.loginStatus = false;
-        //this.user = new User();
         this.auctionItems = new ArrayList<>();
     }
 
     public static void main(String[] args) {
         AuctionSystem auctionSystem = new AuctionSystem();
         auctionSystem.run();
-
     }
-    private void run(){
+
+    public void run() {
         System.out.println("Welcome to the Auction System!");
 
         while (true) {
-            if (loginStatus == false){
+            if (loginStatus == false) {
                 displayMainMenu();
                 int option = getValidOption();
                 switch (option) {
@@ -42,13 +41,11 @@ public class AuctionSystem {
                         System.out.println("Exiting the Auction System. Goodbye!");
                         scanner.close();
                         System.exit(0);
+                    }
                 }
-            }// Switch Ending
-            }else{
-                // Burada buyer seller admin ayrılacak.
             }
-        } // While Ending
-    } // Method Ending
+        }
+    }
 
     private void displayMainMenu() {
         System.out.println("\nChoose an option:");
@@ -108,27 +105,5 @@ public class AuctionSystem {
         User user = new User(emailAddress,userPassword);
         user.register(firstName,lastName,userType);
         loginStatus = true;
-    }
-
-    private void addItem(){ //SELLER
-
-    }
-
-    private void removeItem(){ //SELLER
-
-    }
-
-    private void createMezat(){ //ADMIN
-
-    }
-
-    private void watchMezat(){ //Auction
-        //User user = new User();
-        //user.watchMezat();
-        System.out.println("Registration successful!");
-    }
-
-    private void endMezat(){ //ADMIN
-
     }
 }
