@@ -100,13 +100,13 @@ public class User {
 			if(resultSet.next()) {
 				if("S".equalsIgnoreCase(currentUserType)) {
 					seller = new Seller(userEmail, userPassword);
-					seller.displaySellerMenu();
+					seller.getActionsBySeller();
 				} else if ("B".equalsIgnoreCase(currentUserType)) {
 					buyer = new Buyer(userEmail, userPassword);
 					buyer.getActionsByUser();
 				} else {
 					admin = new Admin(userEmail, userPassword);
-					admin.displayAdminMenu();
+					admin.getActionsByAdmin();
 				}
 			}
 
@@ -137,9 +137,7 @@ public class User {
 	}
 
 
-	public void watchMezat(){
+	public void watchAuction(){
 		System.out.println("Watching Mezat Stream!");
 	}
-
-
 }

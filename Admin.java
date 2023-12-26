@@ -64,7 +64,7 @@ public class Admin extends User{
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
          
-         	String insertQueryUser = "INSERT INTO auctions (auction_id, capacity, timer) " + "VALUES ('" + auctionId + "', '" + capacity + "'";
+         	String insertQueryUser = "INSERT INTO auctions (auction_id, capacity, timer) " + "VALUES ('" + auctionId + "', '" + capacity + "', '" + timer +"'";
          	int rowsAffectedUser = statement.executeUpdate(insertQueryUser);
          	if (rowsAffectedUser > 0) {
          		auctions.add(newAuction);
@@ -72,23 +72,20 @@ public class Admin extends User{
          		System.out.println("Creating auction failed. Please try again.");
          		}
          	connection.close();
-
-			
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 	}
 
-	private void watchAuction() {
 
-		
+	public void watchAuction() {
 		System.out.println("Please enter Auction Id: ");
 		int auctionId = scanner.nextInt();
 
         boolean found = false;
         for (Auction auction : auctions) {
             if (auction.getAuctionId() == auctionId) {
-            	watchMezat(); //KONUŞULACAK
+            	watchAuction(); //KONUŞULACAK
             	System.out.println("Watching " + auctionId +" Auction from streaming service!");
                 found = true;
             }
@@ -160,8 +157,5 @@ public class Admin extends User{
         if (!found) {
             System.out.println("\nNo auction found.");
         }
-
 	}
-
-
 }
