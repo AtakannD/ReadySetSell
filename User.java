@@ -173,7 +173,7 @@ public class User {
 						System.out.println(itemName);
 					}
 				} else {
-					System.out.println("No items found in the auction right now.");
+					System.out.println("No auction found.");
 				}
 			}
 			connection.close();

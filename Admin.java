@@ -145,18 +145,23 @@ public class Admin extends User {
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
 
-            String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = " + auctionId;
-            int affectedRows = statement.executeUpdate(updateQueryUser);
-            if (affectedRows > 0) {
-                found = true;
-                System.out.println("Deletion is success");
-            } else {
-                System.out.println("Deletion process is failed.");
+            String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ?";
+            // String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQueryUser)) {
+                preparedStatement.setInt(1, auctionId);
+                int affectedRows = preparedStatement.executeUpdate();
+                if (affectedRows > 0) {
+                    found = true;
+                    System.out.println("Deletion is success");
+                } else {
+                    System.out.println("Deletion process is failed.");
+                }
+                if (!found) {
+                    System.out.println("\nNo auction found.");
+                }
+                returnAdminsMenu();
             }
-            if (!found) {
-                System.out.println("\nNo auction found.");
-            }
-            returnAdminsMenu();
+
 
         } catch (Exception e) {
             System.out.println(e);
@@ -176,19 +181,22 @@ public class Admin extends User {
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
 
-            String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = " + auctionId + " AND item_name = '" + removedName + "'";
-            int affectedRows = statement.executeUpdate(updateQueryUser);
-            if (affectedRows > 0) {
-                found = true;
-                System.out.println("Deletion is success");
-            } else {
-                System.out.println("Deletion process is failed.");
+            String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ? AND item_name = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(updateQueryUser)) {
+                preparedStatement.setInt(1, auctionId);
+                preparedStatement.setString(2, removedName);
+                int affectedRows = preparedStatement.executeUpdate();
+                if (affectedRows > 0) {
+                    found = true;
+                    System.out.println("Deletion is success");
+                } else {
+                    System.out.println("Deletion process is failed.");
+                }
+                if (!found) {
+                    System.out.println("\nNo auction found.");
+                }
+                returnAdminsMenu();
             }
-            if (!found) {
-                System.out.println("\nNo auction found.");
-            }
-            returnAdminsMenu();
-
         } catch (Exception e) {
             System.out.println(e);
         }

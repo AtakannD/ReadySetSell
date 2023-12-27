@@ -36,7 +36,6 @@ public class AuctionSystem {
                 switch (option) {
                     case 1 -> login();
                     case 2 -> register();
-                    //case 3 -> watchMezat();
                     case 0 -> {
                         System.out.println("Exiting the Auction System. Goodbye!");
                         scanner.close();
