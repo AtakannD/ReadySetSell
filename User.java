@@ -139,11 +139,13 @@ public class User {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			Connection connection = DriverManager.getConnection(url, username, password);
-			String searchQueryForItems = "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL";
+			String searchQueryForItems = "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL LIMIT ?";
+			// "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL LIMIT ?";
 
 			try (PreparedStatement preparedStatementItems = connection.prepareStatement(searchQueryForItems)) {
 
 				preparedStatementItems.setInt(1, auctionId);
+				preparedStatementItems.setInt(2, getItemLimiter(auctionId));
 				ResultSet resultSetForItems = preparedStatementItems.executeQuery();
 
 				auctionList = new ArrayList<>();
@@ -179,4 +181,23 @@ public class User {
 			System.out.println(e);
 		}
 	}
+	public int getItemLimiter(int auctionId) {
+        int limiter = 0;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(url, username, password);
+            Statement statement = connection.createStatement();
+
+            String searchQueryForItems = "SELECT item_capacity FROM items WHERE auction_id = " + auctionId;
+            ResultSet resultSetItemLimiter = statement.executeQuery(searchQueryForItems);
+
+            while (resultSetItemLimiter.next()) {
+                limiter = resultSetItemLimiter.getInt("item_capacity");
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return limiter;
+    }
 }

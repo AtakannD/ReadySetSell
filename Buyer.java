@@ -94,7 +94,7 @@ public class Buyer extends User{
             Connection connection = DriverManager.getConnection(url, username, password);
             Statement statement = connection.createStatement();
 
-            String searchQueryForItems = "SELECT *  FROM items WHERE auction_id = '" + auctionId + "' AND timer IS NOT NULL";
+            String searchQueryForItems = "SELECT * FROM items WHERE auction_id = " + auctionId + " AND timer IS NOT NULL LIMIT " + getItemLimiter(auctionId);
             ResultSet auctionListResult = statement.executeQuery(searchQueryForItems);
 
             auctionList = new ArrayList<>();
