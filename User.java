@@ -66,7 +66,6 @@ public class User {
 			Connection connection = DriverManager.getConnection(url, username, password);
 			Statement statement = connection.createStatement();
 
-			// Insert the new user into the User table
 			String insertQueryUser = "INSERT INTO user (user_name, user_surname, user_email, user_password, user_type) " +
 					"VALUES ('" + userFirstName + "', '" + userLastName + "', '" + userEmail + "', '" + userPassword + "', '" + userType + "')";
 			int rowsAffectedUser = statement.executeUpdate(insertQueryUser);
@@ -89,7 +88,6 @@ public class User {
 			Connection connection = DriverManager.getConnection(url, username, password);
 			Statement statement = connection.createStatement();
 
-			// Use the stored currentUserType to fetch relevant menus
 			String menuDisplayQuery = "SELECT * FROM user WHERE user_type = '" + currentUserType + "'";
 			ResultSet resultSet = statement.executeQuery(menuDisplayQuery);
 
@@ -140,7 +138,6 @@ public class User {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			Connection connection = DriverManager.getConnection(url, username, password);
 			String searchQueryForItems = "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL LIMIT ?";
-			// "SELECT * FROM items WHERE auction_id = ? AND timer IS NOT NULL LIMIT ?";
 
 			try (PreparedStatement preparedStatementItems = connection.prepareStatement(searchQueryForItems)) {
 

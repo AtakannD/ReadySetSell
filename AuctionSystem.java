@@ -1,16 +1,8 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Scanner;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AuctionSystem {
 
     private Scanner scanner;
-    private List<AuctionItem> auctionItems;
 
     private boolean loginStatus;
 
@@ -18,7 +10,6 @@ public class AuctionSystem {
     private AuctionSystem(){
         this.scanner = new Scanner(System.in);
         this.loginStatus = false;
-        this.auctionItems = new ArrayList<>();
     }
 
     public static void main(String[] args) {

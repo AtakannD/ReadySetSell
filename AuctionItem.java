@@ -6,14 +6,11 @@ public class AuctionItem {
 	String itemName;
 	int itemQuantity;
 	public List<Integer> bids;
-	int basePrice;
 	
 	public AuctionItem(Integer auctionId, String itemName, Integer itemQuantity) {
 		this.auctionId = auctionId;
 		this.itemName = itemName;
 		this.itemQuantity = itemQuantity;
-		
 		bids = new ArrayList();
 	}
-
 }

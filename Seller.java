@@ -42,10 +42,10 @@ public class Seller extends User{
         System.out.println("Please enter your items' quantity: ");
         String itemsQuantity = scanner.nextLine();
         System.out.println("Please decide your items' base price: ");
-        Integer itemsBasePrice = scanner.nextInt();
+        int itemsBasePrice = scanner.nextInt();
         System.out.println("Please enter your items' auction number which belongs to: ");
-        Integer itemsAuctionNumber = scanner.nextInt();
-        Integer lowerBid = itemsBasePrice;
+        int itemsAuctionNumber = scanner.nextInt();
+        int lowerBid = itemsBasePrice;
         scanner.nextLine();
 
         try {

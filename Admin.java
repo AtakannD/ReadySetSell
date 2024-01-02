@@ -8,9 +8,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Admin extends User {
-    String url = "jdbc:mysql://localhost:3306/auction_system";
-    String username = "root";
-    String password = "";
 
     public List<Auction> auctions;
 
@@ -20,7 +17,7 @@ public class Admin extends User {
     public Admin(String userEmail, String userPassword) {
         super(userEmail, userPassword);
         scanner = new Scanner(System.in);
-        auctions = new ArrayList();
+        auctions = new ArrayList<>();
         scheduler = Executors.newScheduledThreadPool(1);
     }
 
@@ -70,7 +67,6 @@ public class Admin extends User {
             String updateQueryUser = "UPDATE items SET item_capacity = " + capacity + ", timer = " + timer + " WHERE auction_id = " + auctionId;
             int rowsUpdated = statement.executeUpdate(updateQueryUser);
 
-            // SELECT * FROM items WHERE auction_id = 1 ORDER BY item_id LIMIT 3;
             String selectItemsQuery = "SELECT * FROM items WHERE auction_id = " + auctionId + " ORDER BY item_id LIMIT " + capacity;
 
             ResultSet itemsResultSet = statement.executeQuery(selectItemsQuery);
@@ -78,16 +74,13 @@ public class Admin extends User {
             if (rowsUpdated > 0 && itemsResultSet.next()) {
                 System.out.println("Auction created successfully!");
 
-                // Use CountDownLatch to wait for countdown timer completion
                 CountDownLatch latch = new CountDownLatch(1);
 
-                // Run countdown timer in a separate thread
                 scheduler.execute(() -> {
                     countdownTimer(timer, auctionId);
                     latch.countDown();
                 });
 
-                // Wait for countdown timer to complete before proceeding
                 latch.await();
 
                 auctions.add(newAuction);
@@ -114,10 +107,10 @@ public class Admin extends User {
                 }
             }
             System.out.println("Auction has ended!");
-            scheduler.shutdown(); // Shutdown the scheduler after countdown is complete
+            scheduler.shutdown();
         };
 
-        scheduler.scheduleAtFixedRate(countdownTask, 0, 1, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(countdownTask, 0, 1, TimeUnit.MINUTES);
     }
 
     private void updateRemainingTime(int auctionId, int remainingTime) {
@@ -143,10 +136,8 @@ public class Admin extends User {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection connection = DriverManager.getConnection(url, username, password);
-            Statement statement = connection.createStatement();
 
             String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ?";
-            // String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQueryUser)) {
                 preparedStatement.setInt(1, auctionId);
                 int affectedRows = preparedStatement.executeUpdate();
@@ -161,7 +152,6 @@ public class Admin extends User {
                 }
                 returnAdminsMenu();
             }
-
 
         } catch (Exception e) {
             System.out.println(e);
@@ -179,7 +169,6 @@ public class Admin extends User {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection connection = DriverManager.getConnection(url, username, password);
-            Statement statement = connection.createStatement();
 
             String updateQueryUser = "UPDATE items SET timer = NULL WHERE auction_id = ? AND item_name = ?";
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateQueryUser)) {
