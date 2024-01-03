@@ -7,9 +7,6 @@ public class Buyer extends User{
 
     Scanner scanner;
 
-    String url = "jdbc:mysql://localhost:3306/auction_system";
-    String username = "root";
-    String password = "";
     List<String> searchList;
     List<String> auctionList;
 
@@ -72,11 +69,12 @@ public class Buyer extends User{
                     for (String itemName : searchList) {
                         System.out.println(itemName);
                     }
+                    returnBuyerMenu();
                 } else {
                     System.out.println("No items found matching the search keyword.");
+                    returnBuyerMenu();
                 }
             }
-            returnBuyerMenu();
             connection.close();
         } catch (Exception e) {
             System.out.println(e);
@@ -158,7 +156,7 @@ public class Buyer extends User{
                     int currentBids = resultSet.getInt("bids");
                     int currentBasePrice = resultSet.getInt("base_price");
                     int auctionId = resultSet.getInt("auction_id");
-                    // Check if the new bid is higher
+
                     if (newBidOnItem > currentBids && newBidOnItem > currentBasePrice) {
                         updateBHTable(newBidOnItem, currentBids, auctionId, itemName);
                         String bidQueryForItems = "UPDATE items SET bids = GREATEST(bids, ?) WHERE item_name = ?";
