@@ -84,6 +84,7 @@ public class Admin extends User {
                 latch.await();
 
                 auctions.add(newAuction);
+                sendNotification(auctionId);
             } else {
                 System.out.println("Creating auction failed. Please try again.");
             }
@@ -110,7 +111,7 @@ public class Admin extends User {
             scheduler.shutdown();
         };
 
-        scheduler.scheduleAtFixedRate(countdownTask, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(countdownTask, 0, 1, TimeUnit.SECONDS);
     }
 
     private void updateRemainingTime(int auctionId, int remainingTime) {
@@ -126,6 +127,38 @@ public class Admin extends User {
             System.out.println(e);
         }
     }
+
+    public synchronized void sendNotification(int auctionId) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(url, username, password);
+
+            String notificationQuery = "SELECT DISTINCT auction_id FROM items WHERE auction_id = ? AND timer IS NOT NULL";
+            try (PreparedStatement preparedStatementItems = connection.prepareStatement(notificationQuery)) {
+
+                preparedStatementItems.setInt(1, auctionId);
+
+                ResultSet notificationSetForItems = preparedStatementItems.executeQuery();
+                List<String> auctionList = new ArrayList<>();
+                while (notificationSetForItems.next()) {
+                    int notificationAuctionId = notificationSetForItems.getInt("auction_id");
+                    String notificationString = "Auction " + notificationAuctionId + " has started.";
+                    auctionList.add(notificationString);
+                }
+                if (!auctionList.isEmpty()) {
+                    System.out.println("Currently these auctions are continuing: ");
+                    for (String auctionName : auctionList) {
+                        System.out.println(auctionName);
+                    }
+                } else {
+                    System.out.println("There is no auction started yet.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 
     private void endAuction() {
         boolean found = false;

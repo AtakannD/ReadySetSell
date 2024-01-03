@@ -21,7 +21,7 @@ public class AuctionSystem {
         System.out.println("Welcome to the Auction System!");
 
         while (true) {
-            if (loginStatus == false) {
+            if (!loginStatus) {
                 displayMainMenu();
                 int option = getValidOption();
                 switch (option) {
